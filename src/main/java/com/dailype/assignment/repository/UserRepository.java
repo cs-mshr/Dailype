@@ -9,12 +9,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
-//    List<User> findByMob_num(String mobNum);
-//    List<User> findByManagerId(UUID managerId);
-//
-    Optional<List<User>> findByMobNum(String mobNum);
+    Optional<User> findByMobNum(String mobNum);
 
-    Optional<List<User>> findByUserId(UUID userId);
+    Optional<User> findByUserId(UUID userId);
 
     Optional<List<User>> findByManagerId(UUID managerId);
 }

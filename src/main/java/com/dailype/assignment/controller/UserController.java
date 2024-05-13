@@ -1,8 +1,11 @@
 package com.dailype.assignment.controller;
 
 import com.dailype.assignment.model.User;
+import com.dailype.assignment.pojo.request.CreateUserRequest;
+import com.dailype.assignment.pojo.request.DeletUserRequest;
 import com.dailype.assignment.pojo.request.GetUserRequest;
 import com.dailype.assignment.pojo.response.CreateUserResponse;
+import com.dailype.assignment.pojo.response.DeleteUserResponse;
 import com.dailype.assignment.pojo.response.GetUserResponse;
 import com.dailype.assignment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,64 +23,23 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/create_user")
-    public CreateUserResponse createUser(@RequestBody User user) {
-        CreateUserResponse createUserResponse = userService.createUser(user);
+    public CreateUserResponse createUser(@RequestBody CreateUserRequest createUserRequest) {
+        CreateUserResponse createUserResponse = userService.createUser(createUserRequest);
         return createUserResponse;
     }
 
     @PostMapping("/get_users")
-    public GetUserResponse getUsers(@RequestBody(required = false) User user) {
-        GetUserResponse getUserResponse = userService.getUsers(user);
+    public GetUserResponse getUsers(@RequestBody(required = false) GetUserRequest getUserRequest) {
+        GetUserResponse getUserResponse = userService.getUsers(getUserRequest);
         return getUserResponse;
     }
 
+    @PostMapping("/delete_user")
+    public DeleteUserResponse deleteUser(@RequestBody(required = false) DeletUserRequest deleteUserRequest) {
+        DeleteUserResponse deleteUserResponse = userService.deleteUser(deleteUserRequest);
+        return deleteUserResponse;
+    }
 
 
-//    @Autowired
-//    private UserService userService;
-
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    @PostMapping("/get_users")
-//    public ResponseEntity<?> getUsers(@RequestBody(required = false) User userRequest) {
-//        List<User> users;
-//
-//         If userRequest is null, fetch all users
-//        if (userRequest == null) {
-//            users = userRepository.findAll();
-//        } else {
-//            UUID userId = userRequest.getUser_id();
-//            UUID managerId = userRequest.getManager_id();
-//            String mobNum = userRequest.getMob_num();
-//
-//             If userId is provided, fetch user by userId
-//            if (userId != null) {
-//                Optional<User> user = userRepository.findById(userId);
-//                return user.map(value -> ResponseEntity.ok(Collections.singletonList(value)))
-//                        .orElseGet(() -> ResponseEntity.ok(Collections.emptyList()));
-//            }
-//
-//             If managerId is provided, fetch users by managerId
-//            if (managerId != null) {
-//                users = userRepository.findByManagerId(managerId);
-//            } else if (mobNum != null) {
-//                 If mobNum is provided, fetch user by mobNum
-//                User user = userRepository.findByMobNum(mobNum);
-//                if (user != null) {
-//                    users = Collections.singletonList(user);
-//                } else {
-//                    users = Collections.emptyList();
-//                }
-//            } else {
-//                 If no filter is provided, return all users
-//                users = userRepository.findAll();
-//            }
-//        }
-//
-//         Prepare response
-//        List<User> userDTOs = users.stream().map(User::new).collect(Collectors.toList());
-//        return ResponseEntity.ok(Collections.singletonMap("users", userDTOs));
-//    }
 
 }

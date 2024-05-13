@@ -3,6 +3,7 @@ package com.dailype.assignment.service.Impl;
 import com.dailype.assignment.model.User;
 import com.dailype.assignment.pojo.enums.Status;
 import com.dailype.assignment.pojo.enums.UserDetails;
+import com.dailype.assignment.pojo.request.CreateUserRequest;
 import com.dailype.assignment.pojo.response.CreateUserResponse;
 import com.dailype.assignment.service.ManagerService;
 import com.dailype.assignment.service.UserValidatorService;
@@ -26,13 +27,13 @@ public class UserValidatorServiceImpl implements UserValidatorService {
     private static final String MOBILE_NUMBER_REGEX = "(0|\\+91)?[7-9][0-9]{9}";
 
     @Override
-    public CreateUserResponse validateUser(User user) {
+    public CreateUserResponse validateUser(CreateUserRequest createUserRequest) {
 
         CreateUserResponse createUserResponse = new CreateUserResponse();
         User incorrect_user_detail = new User();
 
-        if (!validateFullName(user.getFullName())) {
-            incorrect_user_detail.setFullName(user.getFullName());
+        if (!validateFullName(createUserRequest.getFull_name())) {
+            incorrect_user_detail.setFullName(createUserRequest.getFull_name());
 
             createUserResponse.setStatus(Status.FAILED);
             createUserResponse.setUserDetails(UserDetails.FULL_NAME_CANNOT_BE_EMPTY);
@@ -41,8 +42,8 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             return createUserResponse;
         }
 
-        if (!validateMobileNumber(user.getMobNum())) {
-            incorrect_user_detail.setMobNum(user.getMobNum());
+        if (!validateMobileNumber(createUserRequest.getMob_num())) {
+            incorrect_user_detail.setMobNum(createUserRequest.getMob_num());
 
             createUserResponse.setStatus(Status.FAILED);
             createUserResponse.setUserDetails(UserDetails.INVALID_MOBILE_NUMBER);
@@ -51,8 +52,8 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             return createUserResponse;
         }
 
-        if (!validatePanNumber(user.getPanNum())) {
-            incorrect_user_detail.setPanNum(user.getPanNum());
+        if (!validatePanNumber(createUserRequest.getPan_num())) {
+            incorrect_user_detail.setPanNum(createUserRequest.getPan_num());
 
             createUserResponse.setStatus(Status.FAILED);
             createUserResponse.setUserDetails(UserDetails.INVALID_PAN_NUMBER);
@@ -61,8 +62,8 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             return createUserResponse;
         }
 
-        if (!validateManagerId(user.getManagerId())) {
-            incorrect_user_detail.setManagerId(user.getManagerId());
+        if (!validateManagerId(createUserRequest.getManager_id())) {
+            incorrect_user_detail.setManagerId(createUserRequest.getManager_id());
 
             createUserResponse.setStatus(Status.FAILED);
             createUserResponse.setUserDetails(UserDetails.INVALID_MANAGER_ID);

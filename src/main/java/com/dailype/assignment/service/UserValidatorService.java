@@ -1,7 +1,7 @@
 package com.dailype.assignment.service;
 
 import com.dailype.assignment.model.User;
-import org.springframework.http.ResponseEntity;
+import com.dailype.assignment.pojo.response.CreateUserResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -9,7 +9,7 @@ import java.util.UUID;
 @Service
 public interface UserValidatorService {
 
-    String validateUser(User user);
+    CreateUserResponse validateUser(User user);
 
     boolean validateFullName(String fullName);
 

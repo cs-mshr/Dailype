@@ -1,7 +1,9 @@
 package com.dailype.assignment.service.Impl;
 
 import com.dailype.assignment.model.User;
-import com.dailype.assignment.repository.ManagerRepository;
+import com.dailype.assignment.pojo.enums.Status;
+import com.dailype.assignment.pojo.enums.UserDetails;
+import com.dailype.assignment.pojo.response.CreateUserResponse;
 import com.dailype.assignment.service.ManagerService;
 import com.dailype.assignment.service.UserValidatorService;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +26,54 @@ public class UserValidatorServiceImpl implements UserValidatorService {
     private static final String MOBILE_NUMBER_REGEX = "(0|\\+91)?[7-9][0-9]{9}";
 
     @Override
-    public String validateUser(User user) {
+    public CreateUserResponse validateUser(User user) {
 
-        if (!validateFullName(user.getFull_name())) {
-            return "Full name cannot be empty";
+        CreateUserResponse createUserResponse = new CreateUserResponse();
+        User incorrect_user_detail = new User();
+
+        if (!validateFullName(user.getFullName())) {
+            incorrect_user_detail.setFullName(user.getFullName());
+
+            createUserResponse.setStatus(Status.FAILED);
+            createUserResponse.setUserDetails(UserDetails.FULL_NAME_CANNOT_BE_EMPTY);
+            createUserResponse.setUser(incorrect_user_detail);
+
+            return createUserResponse;
         }
 
-        if (!validateMobileNumber(user.getMob_num())) {
-            return "Invalid mobile number";
+        if (!validateMobileNumber(user.getMobNum())) {
+            incorrect_user_detail.setMobNum(user.getMobNum());
+
+            createUserResponse.setStatus(Status.FAILED);
+            createUserResponse.setUserDetails(UserDetails.INVALID_MOBILE_NUMBER);
+            createUserResponse.setUser(incorrect_user_detail);
+
+            return createUserResponse;
         }
 
-        if (!validatePanNumber(user.getPan_num())) {
-            return "Invalid PAN number";
+        if (!validatePanNumber(user.getPanNum())) {
+            incorrect_user_detail.setPanNum(user.getPanNum());
+
+            createUserResponse.setStatus(Status.FAILED);
+            createUserResponse.setUserDetails(UserDetails.INVALID_PAN_NUMBER);
+            createUserResponse.setUser(incorrect_user_detail);
+
+            return createUserResponse;
         }
 
-        if (!validateManagerId(user.getManager_id())) {
-            return "Invalid manager ID";
+        if (!validateManagerId(user.getManagerId())) {
+            incorrect_user_detail.setManagerId(user.getManagerId());
+
+            createUserResponse.setStatus(Status.FAILED);
+            createUserResponse.setUserDetails(UserDetails.INVALID_MANAGER_ID);
+            createUserResponse.setUser(incorrect_user_detail);
+
+            return createUserResponse;
         }
 
-        return "Successfully validated";
+        createUserResponse.setStatus(Status.SUCCESS);
+        createUserResponse.setUserDetails(UserDetails.INSERTED_ALL_FIELDS);
+        return createUserResponse;
     }
 
     @Override

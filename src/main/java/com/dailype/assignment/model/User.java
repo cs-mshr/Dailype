@@ -12,15 +12,16 @@ import java.util.UUID;
 public class User {
 
     @Id
-    private UUID user_id;
+    private UUID userId;
 
-    private String full_name;
-    private String mob_num;
-    private String pan_num;
-    private UUID manager_id;
+    private String fullName;
+    private String mobNum;
+    private String panNum;
+    private UUID managerId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private boolean isActive;
+
 }

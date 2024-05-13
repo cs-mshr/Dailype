@@ -6,6 +6,7 @@ import com.dailype.assignment.service.ManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -17,7 +18,11 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public boolean isManagerActive(UUID managerId) {
         // Check if manager exists and is active
-        Manager manager = managerRepository.findByManagerIdAndIsActiveTrue(managerId);
-        return manager != null;
+        Optional<Manager> manager = managerRepository.findByManagerIdAndIsActiveTrue(managerId);
+        if(manager.isPresent()) {
+            return manager.get().isActive();
+        }else{
+            return false;
+        }
     }
 }

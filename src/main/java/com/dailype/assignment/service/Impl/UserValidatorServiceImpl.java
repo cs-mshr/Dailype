@@ -1,14 +1,21 @@
 package com.dailype.assignment.service.Impl;
 
 import com.dailype.assignment.model.User;
+import com.dailype.assignment.repository.ManagerRepository;
+import com.dailype.assignment.service.ManagerService;
 import com.dailype.assignment.service.UserValidatorService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.regex.Pattern;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserValidatorServiceImpl implements UserValidatorService {
+
+    @Autowired
+    private ManagerService managerService;
 
     // Regular expression for a valid PAN number
     private static final String PAN_REGEX = "[A-Z]{5}[0-9]{4}[A-Z]{1}";
@@ -18,6 +25,7 @@ public class UserValidatorServiceImpl implements UserValidatorService {
 
     @Override
     public String validateUser(User user) {
+
         if (!validateFullName(user.getFull_name())) {
             return "Full name cannot be empty";
         }
@@ -30,14 +38,9 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             return "Invalid PAN number";
         }
 
-        // For manager ID validation, you would typically check against the manager table
-        // and ensure that the manager ID exists and is active. Since we don't have access
-        // to your manager table implementation, I'll provide a basic stub implementation.
-
-        // Assuming a method like validateManagerExists(UUID managerId) is available in a ManagerService
-        // if (!managerService.validateManagerExists(user.getManager_id())) {
-        //     return "Invalid manager ID";
-        // }
+        if (!validateManagerId(user.getManager_id())) {
+            return "Invalid manager ID";
+        }
 
         return "Successfully validated";
     }
@@ -59,7 +62,29 @@ public class UserValidatorServiceImpl implements UserValidatorService {
 
     @Override
     public boolean validateManagerId(UUID managerId) {
-        // Assuming manager ID validation is handled elsewhere
-        return true; // Placeholder
+        return managerService.isManagerActive(managerId);
+    }
+
+
+    @Override
+    public String alterMobNo(String mobNum) {
+        String digitsOnly = mobNum.replaceAll("\\D", "");
+
+        // Adjust the number based on prefixes
+        if (digitsOnly.startsWith("0")) {
+            // Remove leading zero
+            digitsOnly = digitsOnly.substring(1);
+        } else if (digitsOnly.startsWith("91")) {
+            // Remove country code "91"
+            digitsOnly = digitsOnly.substring(2);
+        }
+
+        // Ensure the number has exactly 10 digits
+        if (digitsOnly.length() == 10) {
+            return digitsOnly;
+        } else {
+            // Handle invalid mobile number
+            throw new IllegalArgumentException("Invalid mobile number");
+        }
     }
 }

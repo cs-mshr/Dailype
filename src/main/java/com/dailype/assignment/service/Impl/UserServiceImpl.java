@@ -6,6 +6,7 @@ import com.dailype.assignment.service.UserService;
 import com.dailype.assignment.service.UserValidatorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validated_response);
         }
 
+        user.setMob_num(userValidatorService.alterMobNo(user.getMob_num()));
         user.setUser_id(UUID.randomUUID());
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(null);

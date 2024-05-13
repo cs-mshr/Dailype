@@ -18,4 +18,7 @@ public interface UserValidatorService {
     boolean validatePanNumber(String panNum) ;
 
     boolean validateManagerId(UUID managerId);
+
+    String alterMobNo(String mobNum);
+
 }

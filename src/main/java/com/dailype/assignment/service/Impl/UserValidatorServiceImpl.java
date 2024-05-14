@@ -123,7 +123,6 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             throw new IllegalArgumentException("Invalid mobile number");
         }
     }
-
     @Override
     public boolean isValidUpdateData(Map<String, Object> updateData) {
         for (String key : updateData.keySet()) {
@@ -135,15 +134,17 @@ public class UserValidatorServiceImpl implements UserValidatorService {
         for (Map.Entry<String, Object> entry : updateData.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
-            if (key.equals("manager_id") && !validateManagerId((UUID) value)) {
-                return false;
+            if (key.equals("manager_id")) {
+                if (!(value instanceof UUID) || !validateManagerId((UUID) value)) {
+                    return false;
+                }
             }
         }
         return true;
     }
 
-
     private static final String[] VALID_KEYS = {"full_name", "mob_num", "pan_num", "manager_id"};
+
     private boolean isValidKey(String key) {
         for (String validKey : VALID_KEYS) {
             if (validKey.equals(key)) {
@@ -152,4 +153,5 @@ public class UserValidatorServiceImpl implements UserValidatorService {
         }
         return false;
     }
+
 }

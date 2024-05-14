@@ -164,7 +164,6 @@ public class UserServiceImpl implements UserService {
             updateUserResponse.setMessage("Invalid update data. Please provide only valid keys.");
             return updateUserResponse;
         }
-
         // Update users with validated update_data
         for (UUID userId : user_ids) {
             User user = userRepository.findByUserId(userId).get();
@@ -197,10 +196,16 @@ public class UserServiceImpl implements UserService {
             return userRepository.save(updateUser);
         }
 
-        if(updateData.containsKey("manager_id")) {
-            String newManagerId = (String) updateData.get("manager_id");
-            user.setManagerId(UUID.fromString(newManagerId));
+//        if(updateData.containsKey("manager_id")) {
+//            String newManagerId = (String) updateData.get("manager_id");
+//            user.setManagerId(UUID.fromString(newManagerId));
+//        }
+
+        if (updateData.containsKey("manager_id")) {
+//            UUID newManagerId = (UUID) updateData.get("manager_id");
+//            user.setManagerId(newManagerId);
         }
+
         user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);

@@ -4,6 +4,8 @@ import com.dailype.assignment.model.User;
 import com.dailype.assignment.pojo.enums.Status;
 import com.dailype.assignment.pojo.enums.UserDetails;
 import com.dailype.assignment.pojo.request.CreateUserRequest;
+import com.dailype.assignment.pojo.request.UpdateUserRequest;
+import com.dailype.assignment.pojo.request.UpdatedDataForm;
 import com.dailype.assignment.pojo.request.ValidateUserDetailsRequest;
 import com.dailype.assignment.pojo.response.CreateUserResponse;
 import com.dailype.assignment.pojo.response.ValidateUserDetailsResponse;
@@ -82,6 +84,55 @@ public class UserValidatorServiceImpl implements UserValidatorService {
     }
 
     @Override
+    public ValidateUserDetailsResponse userDetailsForUpdate(UpdatedDataForm updatedDataForm) {
+        ValidateUserDetailsResponse validateUserDetailsResponse = new ValidateUserDetailsResponse();
+        User incorrect_user_detail = new User();
+
+        if(updatedDataForm.getFull_name() != null){
+            if(!validateFullName(updatedDataForm.getFull_name())) {
+                incorrect_user_detail.setFullName(updatedDataForm.getFull_name());
+
+                validateUserDetailsResponse.setStatus(Status.FAILED);
+                validateUserDetailsResponse.setUserDetails(UserDetails.FULL_NAME_CANNOT_BE_EMPTY);
+                validateUserDetailsResponse.setUser(incorrect_user_detail);
+            }
+        }
+
+        if(updatedDataForm.getPan_num() != null){
+            if(!validatePanNumber(updatedDataForm.getPan_num())) {
+                incorrect_user_detail.setPanNum(updatedDataForm.getPan_num());
+
+                validateUserDetailsResponse.setStatus(Status.FAILED);
+                validateUserDetailsResponse.setUserDetails(UserDetails.INVALID_PAN_NUMBER);
+                validateUserDetailsResponse.setUser(incorrect_user_detail);
+            }
+        }
+
+        if(updatedDataForm.getManager_id() != null){
+            if(!validateManagerId(updatedDataForm.getManager_id())) {
+                incorrect_user_detail.setManagerId(updatedDataForm.getManager_id());
+
+                validateUserDetailsResponse.setStatus(Status.FAILED);
+                validateUserDetailsResponse.setUserDetails(UserDetails.INVALID_MANAGER_ID);
+                validateUserDetailsResponse.setUser(incorrect_user_detail);
+            }
+        }
+
+        if(updatedDataForm.getMob_num() != null){
+            if(!validateMobileNumber(updatedDataForm.getMob_num())) {
+                incorrect_user_detail.setMobNum(updatedDataForm.getMob_num());
+                validateUserDetailsResponse.setStatus(Status.FAILED);
+                validateUserDetailsResponse.setUserDetails(UserDetails.INVALID_MOBILE_NUMBER);
+                validateUserDetailsResponse.setUser(incorrect_user_detail);
+            }
+        }
+
+        if(validateUserDetailsResponse.getUserDetails() == null)
+            validateUserDetailsResponse.setUserDetails(UserDetails.ALL_FIELDS_ARE_VALID);
+        return validateUserDetailsResponse;
+    }
+
+    @Override
     public boolean validateFullName(String fullName) {
         return fullName != null && !fullName.trim().isEmpty();
     }
@@ -122,36 +173,6 @@ public class UserValidatorServiceImpl implements UserValidatorService {
             // Handle invalid mobile number
             throw new IllegalArgumentException("Invalid mobile number");
         }
-    }
-    @Override
-    public boolean isValidUpdateData(Map<String, Object> updateData) {
-        for (String key : updateData.keySet()) {
-            if (!isValidKey(key)) {
-                return false;
-            }
-        }
-
-        for (Map.Entry<String, Object> entry : updateData.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key.equals("manager_id")) {
-                if (!(value instanceof UUID) || !validateManagerId((UUID) value)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private static final String[] VALID_KEYS = {"full_name", "mob_num", "pan_num", "manager_id"};
-
-    private boolean isValidKey(String key) {
-        for (String validKey : VALID_KEYS) {
-            if (validKey.equals(key)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

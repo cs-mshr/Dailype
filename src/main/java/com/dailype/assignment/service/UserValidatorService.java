@@ -2,6 +2,7 @@ package com.dailype.assignment.service;
 
 import com.dailype.assignment.model.User;
 import com.dailype.assignment.pojo.request.CreateUserRequest;
+import com.dailype.assignment.pojo.request.UpdatedDataForm;
 import com.dailype.assignment.pojo.request.ValidateUserDetailsRequest;
 import com.dailype.assignment.pojo.response.CreateUserResponse;
 import com.dailype.assignment.pojo.response.ValidateUserDetailsResponse;
@@ -25,5 +26,5 @@ public interface UserValidatorService {
 
     String alterMobNo(String mobNum);
 
-    boolean isValidUpdateData(Map<String, Object> updateData);
+    ValidateUserDetailsResponse userDetailsForUpdate(UpdatedDataForm updatedDataForm);
 }

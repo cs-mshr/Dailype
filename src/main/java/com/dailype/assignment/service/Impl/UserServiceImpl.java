@@ -139,6 +139,8 @@ public class UserServiceImpl implements UserService {
         UpdateUserResponse updateUserResponse = new UpdateUserResponse();
         List<String> errors = new ArrayList<>();
 
+        UpdatedDataForm updatedDataForm = updateUserRequest.getUpdate_data();
+
         // Check if user_ids exist in the database
         List<UUID> user_ids = updateUserRequest.getUser_ids();
         for (UUID userId : user_ids) {
@@ -155,60 +157,75 @@ public class UserServiceImpl implements UserService {
             return updateUserResponse;
         }
 
-        // Validate update_data
-        /*
-        TODO: Response for which manger_id validation failed.
-        */
-        if (!userValidatorService.isValidUpdateData(updateUserRequest.getUpdate_data())) {
+        if(updateUserRequest.getUser_ids().size() == 1){
+            UUID user_id = updateUserRequest.getUser_ids().get(0);
+            Optional<User> userOptional = userRepository.findById(user_id);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+
+                //Validating user update-data
+                ValidateUserDetailsResponse validateUserDetailsResponse
+                        = userValidatorService.userDetailsForUpdate(updateUserRequest.getUpdate_data());
+                if(!validateUserDetailsResponse.getUserDetails().equals(UserDetails.ALL_FIELDS_ARE_VALID)){
+                    updateUserResponse.setStatus(Status.FAILED);
+                    updateUserResponse.setMessage(validateUserDetailsResponse.getUserDetails().toString());
+                    return updateUserResponse;
+                }
+
+                //Updating DB with updated user-fields
+                if(updatedDataForm.getMob_num() != null){
+                    user.setMobNum(updatedDataForm.getMob_num());
+                }
+                if(updatedDataForm.getManager_id() != null){
+                    user.setManagerId(updatedDataForm.getManager_id());
+                }
+                if(updatedDataForm.getPan_num() != null){
+                    user.setPanNum(updatedDataForm.getPan_num());
+                }
+                if(updatedDataForm.getFull_name() != null){
+                    user.setFullName(updatedDataForm.getFull_name());
+                }
+
+                userRepository.save(user);
+                updateUserResponse.setUpdatedUsers(List.of(user));
+            }
+
+        }else if(updateUserRequest.getUser_ids().size() > 1){
+
+            //1. if object contains any field other than manager id
+            // return error as "extra keys present these keys can be updated
+            // on an individual basis only and not in bulk"
+            if(updatedDataForm.getFull_name()!=null || updatedDataForm.getPan_num()!=null || updatedDataForm.getMob_num()!=null){
+                updateUserResponse.setStatus(Status.FAILED);
+                updateUserResponse.setMessage("extra keys present these keys cannot be updated in bulk_update, use individual update for them");
+            }
+
+            //2. validate manger id, call update manager id for each user_id
+            boolean isManagerIdValid = userValidatorService.validateManagerId(updatedDataForm.getManager_id());
+
+            if(!isManagerIdValid){
+                updateUserResponse.setStatus(Status.FAILED);
+                updateUserResponse.setMessage("Manager ID is not valid");
+
+                return updateUserResponse;
+            }
+
+            //Updating manager-id for each user in bulk update
+            for(UUID userId : user_ids){
+                Optional<User> userOptional = userRepository.findById(userId);
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    user.setManagerId(updatedDataForm.getManager_id());
+                    userRepository.save(user);
+                }
+            }
+
+        }else{
             updateUserResponse.setStatus(Status.FAILED);
-            updateUserResponse.setMessage("Invalid update data. Please provide only valid keys.");
-            return updateUserResponse;
-        }
-        // Update users with validated update_data
-        for (UUID userId : user_ids) {
-            User user = userRepository.findByUserId(userId).get();
-            user = updateUser(user, updateUserRequest.getUpdate_data());
-            updateUserResponse.getUpdatedUsers().add(user);
+            updateUserResponse.setMessage("User_id not present in request");
         }
 
         updateUserResponse.setStatus(Status.SUCCESS);
-        updateUserResponse.setMessage("Users updated successfully.");
         return updateUserResponse;
     }
-
-    private User updateUser(User user, Map<String, Object> updateData) {
-        User updateUser = new User();
-        if(user.getManagerId() != null){
-            user.setActive(false);
-
-            updateUser.setManagerId(user.getManagerId());
-
-            updateUser.setActive(true);
-            updateUser.setUpdatedAt(LocalDateTime.now());
-            updateUser.setCreatedAt(LocalDateTime.now());
-            updateUser.setUserId(UUID.randomUUID());
-
-            updateUser.setPanNum(user.getPanNum());
-            updateUser.setMobNum(user.getMobNum());
-            updateUser.setFullName(user.getFullName());
-
-            userRepository.save(user);
-            return userRepository.save(updateUser);
-        }
-
-//        if(updateData.containsKey("manager_id")) {
-//            String newManagerId = (String) updateData.get("manager_id");
-//            user.setManagerId(UUID.fromString(newManagerId));
-//        }
-
-        if (updateData.containsKey("manager_id")) {
-//            UUID newManagerId = (UUID) updateData.get("manager_id");
-//            user.setManagerId(newManagerId);
-        }
-
-        user.setUpdatedAt(LocalDateTime.now());
-
-        return userRepository.save(user);
-    }
-
 }

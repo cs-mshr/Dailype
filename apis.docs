@@ -1,0 +1,321 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "OpenAPI definition",
+        "version": "v0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "paths": {
+        "/api/user/update_user": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "updateUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateUserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/get_users": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "getUsers",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GetUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/delete_user": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "deleteUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeletUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeleteUserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/create_user": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "operationId": "createUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateUserResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UpdateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "user_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "update_data": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "UpdateUserResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "SUCCESS",
+                            "FAILED",
+                            "NOT_FOUND"
+                        ]
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "errors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "updatedUsers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/User"
+                        }
+                    }
+                }
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "fullName": {
+                        "type": "string"
+                    },
+                    "mobNum": {
+                        "type": "string"
+                    },
+                    "panNum": {
+                        "type": "string"
+                    },
+                    "managerId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "GetUserRequest": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "mob_num": {
+                        "type": "string"
+                    },
+                    "manager_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "GetUserResponse": {
+                "type": "object",
+                "properties": {
+                    "users": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/User"
+                        }
+                    }
+                }
+            },
+            "DeletUserRequest": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "mob_num": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DeleteUserResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "SUCCESS",
+                            "FAILED",
+                            "NOT_FOUND"
+                        ]
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "mob_num": {
+                        "type": "string"
+                    },
+                    "error_message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CreateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "full_name": {
+                        "type": "string"
+                    },
+                    "mob_num": {
+                        "type": "string"
+                    },
+                    "pan_num": {
+                        "type": "string"
+                    },
+                    "manager_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                }
+            },
+            "CreateUserResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "SUCCESS",
+                            "FAILED",
+                            "NOT_FOUND"
+                        ]
+                    },
+                    "userDetails": {
+                        "type": "string",
+                        "enum": [
+                            "FULL_NAME_CANNOT_BE_EMPTY",
+                            "INVALID_MOBILE_NUMBER",
+                            "INVALID_PAN_NUMBER",
+                            "INVALID_MANAGER_ID",
+                            "INSERTED_ALL_FIELDS"
+                        ]
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                }
+            }
+        }
+    }
+}

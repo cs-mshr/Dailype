@@ -3,12 +3,8 @@ package com.dailype.assignment.service.Impl;
 import com.dailype.assignment.model.User;
 import com.dailype.assignment.pojo.enums.Status;
 import com.dailype.assignment.pojo.enums.UserDetails;
-import com.dailype.assignment.pojo.request.CreateUserRequest;
-import com.dailype.assignment.pojo.request.DeletUserRequest;
-import com.dailype.assignment.pojo.request.GetUserRequest;
-import com.dailype.assignment.pojo.response.CreateUserResponse;
-import com.dailype.assignment.pojo.response.DeleteUserResponse;
-import com.dailype.assignment.pojo.response.GetUserResponse;
+import com.dailype.assignment.pojo.request.*;
+import com.dailype.assignment.pojo.response.*;
 import com.dailype.assignment.repository.UserRepository;
 import com.dailype.assignment.service.UserService;
 import com.dailype.assignment.service.UserValidatorService;
@@ -17,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +28,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public CreateUserResponse createUser(CreateUserRequest createUserRequest) {
 
-        CreateUserResponse createUserResponse = userValidatorService.validateUser(createUserRequest);
+        ValidateUserDetailsRequest validateUserDetailsRequest = new ValidateUserDetailsRequest();
+        convertCreateRequestTOValidateRequest(createUserRequest,validateUserDetailsRequest);
 
-        if(!createUserResponse.getUserDetails().equals(UserDetails.INSERTED_ALL_FIELDS)){
+        ValidateUserDetailsResponse validateUserDetailsResponse = userValidatorService.validateUser(validateUserDetailsRequest);
+
+        CreateUserResponse createUserResponse = new CreateUserResponse();
+        convertValidateResponseTOCreateResponse(validateUserDetailsResponse,createUserResponse);
+
+        if(!validateUserDetailsResponse.getUserDetails().equals(UserDetails.INSERTED_ALL_FIELDS)){
             return createUserResponse;
         }
 
@@ -58,6 +57,19 @@ public class UserServiceImpl implements UserService {
 
         createUserResponse.setUser(user);
         return createUserResponse;
+    }
+
+    private void convertValidateResponseTOCreateResponse(ValidateUserDetailsResponse validateUserDetailsResponse, CreateUserResponse createUserResponse) {
+        createUserResponse.setStatus(validateUserDetailsResponse.getStatus());
+        createUserResponse.setUserDetails(validateUserDetailsResponse.getUserDetails());
+        createUserResponse.setUser(validateUserDetailsResponse.getUser());
+    }
+
+    private void convertCreateRequestTOValidateRequest(CreateUserRequest createUserRequest, ValidateUserDetailsRequest validateUserDetailsRequest) {
+        validateUserDetailsRequest.setFull_name(createUserRequest.getFull_name());
+        validateUserDetailsRequest.setManager_id(createUserRequest.getManager_id());
+        validateUserDetailsRequest.setPan_num(createUserRequest.getPan_num());
+        validateUserDetailsRequest.setMob_num(createUserRequest.getMob_num());
     }
 
     @Override
@@ -120,6 +132,78 @@ public class UserServiceImpl implements UserService {
         deleteUserResponse.setStatus(Status.FAILED);
         deleteUserResponse.setError_message("Please provide either user_id or mob_num.");
         return deleteUserResponse;
+    }
+
+    @Override
+    public UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest) {
+        UpdateUserResponse updateUserResponse = new UpdateUserResponse();
+        List<String> errors = new ArrayList<>();
+
+        // Check if user_ids exist in the database
+        List<UUID> user_ids = updateUserRequest.getUser_ids();
+        for (UUID userId : user_ids) {
+            Optional<User> userOptional = userRepository.findByUserId(userId);
+            if (userOptional.isEmpty()) {
+                errors.add("ID: " + userId + " NOT FOUND");
+            }
+        }
+
+        // If any user_id is not found, return error response
+        if (!errors.isEmpty()) {
+            updateUserResponse.setStatus(Status.FAILED);
+            updateUserResponse.setErrors(errors);
+            return updateUserResponse;
+        }
+
+        // Validate update_data
+        /*
+        TODO: Response for which manger_id validation failed.
+        */
+        if (!userValidatorService.isValidUpdateData(updateUserRequest.getUpdate_data())) {
+            updateUserResponse.setStatus(Status.FAILED);
+            updateUserResponse.setMessage("Invalid update data. Please provide only valid keys.");
+            return updateUserResponse;
+        }
+
+        // Update users with validated update_data
+        for (UUID userId : user_ids) {
+            User user = userRepository.findByUserId(userId).get();
+            user = updateUser(user, updateUserRequest.getUpdate_data());
+            updateUserResponse.getUpdatedUsers().add(user);
+        }
+
+        updateUserResponse.setStatus(Status.SUCCESS);
+        updateUserResponse.setMessage("Users updated successfully.");
+        return updateUserResponse;
+    }
+
+    private User updateUser(User user, Map<String, Object> updateData) {
+        User updateUser = new User();
+        if(user.getManagerId() != null){
+            user.setActive(false);
+
+            updateUser.setManagerId(user.getManagerId());
+
+            updateUser.setActive(true);
+            updateUser.setUpdatedAt(LocalDateTime.now());
+            updateUser.setCreatedAt(LocalDateTime.now());
+            updateUser.setUserId(UUID.randomUUID());
+
+            updateUser.setPanNum(user.getPanNum());
+            updateUser.setMobNum(user.getMobNum());
+            updateUser.setFullName(user.getFullName());
+
+            userRepository.save(user);
+            return userRepository.save(updateUser);
+        }
+
+        if(updateData.containsKey("manager_id")) {
+            String newManagerId = (String) updateData.get("manager_id");
+            user.setManagerId(UUID.fromString(newManagerId));
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(user);
     }
 
 }

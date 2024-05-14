@@ -165,8 +165,12 @@ public class UserServiceImpl implements UserService {
 
                 //Validating user update-data
                 ValidateUserDetailsResponse validateUserDetailsResponse
-                        = userValidatorService.userDetailsForUpdate(updateUserRequest.getUpdate_data());
+                        = userValidatorService.userDetailsForUpdate(
+                                updateUserRequest.getUpdate_data()
+                            );
+
                 if(!validateUserDetailsResponse.getUserDetails().equals(UserDetails.ALL_FIELDS_ARE_VALID)){
+
                     updateUserResponse.setStatus(Status.FAILED);
                     updateUserResponse.setMessage(validateUserDetailsResponse.getUserDetails().toString());
                     return updateUserResponse;
@@ -176,9 +180,6 @@ public class UserServiceImpl implements UserService {
                 if(updatedDataForm.getMob_num() != null){
                     user.setMobNum(updatedDataForm.getMob_num());
                 }
-                if(updatedDataForm.getManager_id() != null){
-                    user.setManagerId(updatedDataForm.getManager_id());
-                }
                 if(updatedDataForm.getPan_num() != null){
                     user.setPanNum(updatedDataForm.getPan_num());
                 }
@@ -186,22 +187,23 @@ public class UserServiceImpl implements UserService {
                     user.setFullName(updatedDataForm.getFull_name());
                 }
 
-                userRepository.save(user);
+                ManagerIdUpdate(updatedDataForm, user);
                 updateUserResponse.setUpdatedUsers(List.of(user));
             }
 
         }else if(updateUserRequest.getUser_ids().size() > 1){
 
-            //1. if object contains any field other than manager id
-            // return error as "extra keys present these keys can be updated
-            // on an individual basis only and not in bulk"
-            if(updatedDataForm.getFull_name()!=null || updatedDataForm.getPan_num()!=null || updatedDataForm.getMob_num()!=null){
+            //1. if object contains any field other than manager id in bulk_update
+            if(updatedDataForm.getFull_name()!=null
+                    || updatedDataForm.getPan_num()!=null || updatedDataForm.getMob_num()!=null){
                 updateUserResponse.setStatus(Status.FAILED);
                 updateUserResponse.setMessage("extra keys present these keys cannot be updated in bulk_update, use individual update for them");
             }
 
             //2. validate manger id, call update manager id for each user_id
-            boolean isManagerIdValid = userValidatorService.validateManagerId(updatedDataForm.getManager_id());
+            boolean isManagerIdValid = userValidatorService.validateManagerId(
+                    updatedDataForm.getManager_id()
+            );
 
             if(!isManagerIdValid){
                 updateUserResponse.setStatus(Status.FAILED);
@@ -215,8 +217,7 @@ public class UserServiceImpl implements UserService {
                 Optional<User> userOptional = userRepository.findById(userId);
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
-                    user.setManagerId(updatedDataForm.getManager_id());
-                    userRepository.save(user);
+                    ManagerIdUpdate(updatedDataForm, user);
                 }
             }
 
@@ -227,5 +228,28 @@ public class UserServiceImpl implements UserService {
 
         updateUserResponse.setStatus(Status.SUCCESS);
         return updateUserResponse;
+    }
+
+    private void ManagerIdUpdate(UpdatedDataForm updatedDataForm, User user) {
+        if(user.getManagerId() == null || user.getManagerId() == updatedDataForm.getManager_id()){
+//                if(user.getManagerId() == null){
+            user.setManagerId(updatedDataForm.getManager_id());
+        }
+        else{
+            user.setActive(false);
+            User newUser = User.builder()
+                    .fullName(user.getFullName())
+                    .managerId(updatedDataForm.getManager_id())
+                    .updatedAt(LocalDateTime.now())
+                    .userId(UUID.randomUUID())
+                    .isActive(true)
+                    .panNum(user.getPanNum())
+                    .mobNum(user.getMobNum())
+                    .build();
+            userRepository.save(newUser);
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

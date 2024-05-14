@@ -2,13 +2,17 @@ package com.dailype.assignment.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Data;
+import jdk.jfr.Registered;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Entity
+@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id

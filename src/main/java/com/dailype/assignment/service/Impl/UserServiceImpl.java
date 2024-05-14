@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
         GetUserResponse getUserResponse = new GetUserResponse();
         List<User> users;
 
-        if (getUserRequest == null) {
+        if (getUserRequest.getUser_id()==null && getUserRequest.getMob_num()==null && getUserRequest.getManager_id()==null) {
             users = userRepository.findAll();
         } else if (getUserRequest.getMob_num() != null) {
             Optional<User> user = userRepository.findByMobNum(getUserRequest.getMob_num());

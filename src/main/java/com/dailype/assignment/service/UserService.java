@@ -1,14 +1,7 @@
 package com.dailype.assignment.service;
 
-import com.dailype.assignment.model.User;
-import com.dailype.assignment.pojo.request.CreateUserRequest;
-import com.dailype.assignment.pojo.request.DeletUserRequest;
-import com.dailype.assignment.pojo.request.GetUserRequest;
-import com.dailype.assignment.pojo.request.UpdateUserRequest;
-import com.dailype.assignment.pojo.response.CreateUserResponse;
-import com.dailype.assignment.pojo.response.DeleteUserResponse;
-import com.dailype.assignment.pojo.response.GetUserResponse;
-import com.dailype.assignment.pojo.response.UpdateUserResponse;
+import com.dailype.assignment.pojo.request.*;
+import com.dailype.assignment.pojo.response.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,4 +14,6 @@ public interface UserService {
     DeleteUserResponse deleteUser(DeletUserRequest deleteUserRequest);
 
     UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest);
+
+    FetchEmployeeResponse fetchEmployee(FetchEmployeeRequest fetchEmployeeRequest);
 }

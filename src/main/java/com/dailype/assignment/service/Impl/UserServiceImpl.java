@@ -230,6 +230,38 @@ public class UserServiceImpl implements UserService {
         return updateUserResponse;
     }
 
+    @Override
+    public FetchEmployeeResponse fetchEmployee(FetchEmployeeRequest fetchEmployeeRequest) {
+        UUID manager_id = fetchEmployeeRequest.getManager_id();
+        Optional<User> user = userRepository.findByUserId(manager_id);
+
+        FetchEmployeeResponse fetchEmployeeResponse = new FetchEmployeeResponse();
+        List<FetchEmployeeResponse> employeesData = new ArrayList<>();
+        if(user.isPresent()){
+            String name = user.get().getFullName();
+            fetchEmployeeResponse.setName(name);
+
+            Optional<List<User>> child = userRepository.findByManagerId(manager_id);
+
+            if(child.isPresent()){
+                for(User childUser : child.get()){
+                    employeesData.add(
+                            fetchEmployee(
+                                    FetchEmployeeRequest.builder()
+                                            .manager_id(childUser.getUserId())
+                                            .build()
+                                )
+                    );
+                }
+
+                fetchEmployeeResponse.setUsers(employeesData);
+            }
+
+        }
+
+        return fetchEmployeeResponse;
+    }
+
     private void ManagerIdUpdate(UpdatedDataForm updatedDataForm, User user) {
         if(user.getManagerId() == null || user.getManagerId() == updatedDataForm.getManager_id()){
 //                if(user.getManagerId() == null){
